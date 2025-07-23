@@ -14,11 +14,6 @@ export const Achievements = () => {
       description: "Trusted by businesses worldwide"
     },
     {
-      icon: <Globe className="w-8 h-8 text-green-500" />,
-      title: "50+ Countries",
-      description: "Global presence and support"
-    },
-    {
       icon: <Star className="w-8 h-8 text-purple-500" />,
       title: "4.9/5 Rating",
       description: "Customer satisfaction score"
@@ -28,8 +23,7 @@ export const Achievements = () => {
   const stats = [
     { number: "99.9%", label: "Uptime" },
     { number: "24/7", label: "Support" },
-    { number: "500+", label: "Projects" },
-    { number: "15+", label: "Years Experience" }
+    { number: "100+", label: "Projects" },
   ];
 
   return (
