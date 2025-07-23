@@ -1,6 +1,16 @@
 
 import { ContactForm } from "@/components/ContactForm";
 import { ContactInfo } from "@/components/ContactInfo";
+import { db } from '../firebase';
+import { collection, addDoc } from 'firebase/firestore';
+
+const handleSubmit = async () => {
+  await addDoc(collection(db, "contacts"), {
+    name: userName,
+    email: userEmail,
+    message: userMessage,
+  });
+};
 
 const Contact = () => {
   return (

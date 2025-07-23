@@ -1,6 +1,17 @@
 
 import { ProductCatalog } from "@/components/ProductCatalog";
 import { OrderForm } from "@/components/OrderForm";
+import { db } from '../firebase';
+import { collection, addDoc } from 'firebase/firestore';
+
+const handleServiceSubmit = async () => {
+  await addDoc(collection(db, "services"), {
+    name: userName,
+    service: selectedService,
+    phone: userPhone,
+  });
+};
+
 
 const Services = () => {
   return (

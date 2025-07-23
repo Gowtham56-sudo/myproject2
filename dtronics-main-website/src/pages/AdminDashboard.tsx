@@ -1,84 +1,64 @@
+// ✅ Full AdminDashboard.tsx integrated with Firebase Firestore
 
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import {
+  Card, CardContent, CardDescription, CardHeader, CardTitle
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Package, Users, TrendingUp, Eye } from "lucide-react";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue
+} from "@/components/ui/select";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow
+} from "@/components/ui/table";
+import {
+  Tabs, TabsContent, TabsList, TabsTrigger
+} from "@/components/ui/tabs";
+import {
+  Shield, Package, Users, TrendingUp
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+
+// Firebase Firestore
+import { db } from "@/firebase";
+import {
+  collection, getDocs, updateDoc, doc
+} from "firebase/firestore";
 
 const AdminDashboard = () => {
   const { toast } = useToast();
 
-  const [orders, setOrders] = useState([
-    {
-      id: "ORD-001",
-      customerName: "John Doe",
-      customerEmail: "john@example.com",
-      product: "Smart IoT Controller Pro",
-      quantity: 2,
-      total: "$598",
-      status: "pending",
-      date: "2024-01-15",
-      phone: "+1 (555) 123-4567"
-    },
-    {
-      id: "ORD-002",
-      customerName: "Jane Smith",
-      customerEmail: "jane@example.com",
-      product: "Wireless Sensor Network",
-      quantity: 1,
-      total: "$199",
-      status: "processing",
-      date: "2024-01-14",
-      phone: "+1 (555) 987-6543"
-    },
-    {
-      id: "ORD-003",
-      customerName: "Bob Johnson",
-      customerEmail: "bob@example.com",
-      product: "Mobile Control App",
-      quantity: 3,
-      total: "$297",
-      status: "completed",
-      date: "2024-01-13",
-      phone: "+1 (555) 456-7890"
-    }
-  ]);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [customers, setCustomers] = useState<any[]>([]);
 
-  const [customers] = useState([
-    {
-      id: "CUST-001",
-      name: "John Doe",
-      email: "john@example.com",
-      phone: "+1 (555) 123-4567",
-      orders: 3,
-      totalSpent: "$1,245"
-    },
-    {
-      id: "CUST-002",
-      name: "Jane Smith",
-      email: "jane@example.com",
-      phone: "+1 (555) 987-6543",
-      orders: 1,
-      totalSpent: "$199"
-    },
-    {
-      id: "CUST-003",
-      name: "Bob Johnson",
-      email: "bob@example.com",
-      phone: "+1 (555) 456-7890",
-      orders: 2,
-      totalSpent: "$596"
-    }
-  ]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const ordersSnap = await getDocs(collection(db, "orders"));
+        const customersSnap = await getDocs(collection(db, "customers"));
 
-  const updateOrderStatus = (orderId: string, newStatus: string) => {
-    setOrders(orders.map(order => 
+        const orderList = ordersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const customerList = customersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        setOrders(orderList);
+        setCustomers(customerList);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    setOrders(orders.map(order =>
       order.id === orderId ? { ...order, status: newStatus } : order
     ));
+
+    const orderRef = doc(db, "orders", orderId);
+    await updateDoc(orderRef, { status: newStatus });
+
     toast({
       title: "Order Updated",
       description: `Order ${orderId} status changed to ${newStatus}`,
@@ -87,16 +67,11 @@ const AdminDashboard = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "processing":
-        return "bg-blue-100 text-blue-800";
-      case "completed":
-        return "bg-green-100 text-green-800";
-      case "cancelled":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+      case "pending": return "bg-yellow-100 text-yellow-800";
+      case "processing": return "bg-blue-100 text-blue-800";
+      case "completed": return "bg-green-100 text-green-800";
+      case "cancelled": return "bg-red-100 text-red-800";
+      default: return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -114,7 +89,7 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* Stats Cards */}
+        {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -126,6 +101,7 @@ const AdminDashboard = () => {
               <p className="text-xs text-muted-foreground">+2 from last week</p>
             </CardContent>
           </Card>
+
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Customers</CardTitle>
@@ -136,6 +112,7 @@ const AdminDashboard = () => {
               <p className="text-xs text-muted-foreground">+1 from last week</p>
             </CardContent>
           </Card>
+
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Revenue</CardTitle>
@@ -179,10 +156,8 @@ const AdminDashboard = () => {
                       <TableRow key={order.id}>
                         <TableCell className="font-medium">{order.id}</TableCell>
                         <TableCell>
-                          <div>
-                            <div className="font-medium">{order.customerName}</div>
-                            <div className="text-sm text-gray-500">{order.customerEmail}</div>
-                          </div>
+                          <div className="font-medium">{order.customerName}</div>
+                          <div className="text-sm text-gray-500">{order.customerEmail}</div>
                         </TableCell>
                         <TableCell>{order.product}</TableCell>
                         <TableCell>{order.quantity}</TableCell>
@@ -194,8 +169,8 @@ const AdminDashboard = () => {
                         </TableCell>
                         <TableCell>{order.date}</TableCell>
                         <TableCell>
-                          <Select 
-                            value={order.status} 
+                          <Select
+                            value={order.status}
                             onValueChange={(value) => updateOrderStatus(order.id, value)}
                           >
                             <SelectTrigger className="w-32">

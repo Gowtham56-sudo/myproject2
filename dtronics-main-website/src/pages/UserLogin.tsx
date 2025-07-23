@@ -8,6 +8,15 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { User, Eye, EyeOff, Mail, Lock, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { auth } from '../firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+
+signInWithEmailAndPassword(auth, email, password)
+  .then(userCred => {
+    console.log("User logged in:", userCred.user);
+  })
+  .catch(err => alert("Invalid login"));
+
 
 const UserLogin = () => {
   const [isLogin, setIsLogin] = useState(true);
